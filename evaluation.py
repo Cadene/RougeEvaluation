@@ -13,17 +13,18 @@ __author__ = "Remi Cadene"
 
 class Evaluation:
 
-    def __init__(self, path2rslt='./rslt/'
+    def __init__(self, path2rslt='./rslt/',
                  path2txt='./corpus/txt/',
                  path2summaries='./corpus/summaries/',
                  path2models='./corpus/RST-DT/EXT-EDUS-30/',
                  path2summaries2rouge='./src/summaries2rouge/summaries2rouge.py',
                  path2rouge2csv='./src/rouge2csv/rouge2csv.py',
-                 path2rouge='./src/ROUGE-1.5.5/ROUGE-1.5.5.pl',
+                 path2rouge='./src/ROUGE-1.5.5/',
                  path2summarize='./../SummarizeApp/discourse/src/summarize.py'):
+        self.path2rslt = path2rslt
         self.path2txt = path2txt
         self.path2summaries = path2summaries
-        self.path2model = path2models
+        self.path2models = path2models
         self.path2summaries2rouge = path2summaries2rouge
         self.path2rouge2csv = path2rouge2csv
         self.path2rouge = path2rouge
@@ -37,9 +38,9 @@ class Evaluation:
             for each model files """
         model_fnames = []
         model_EDUs = []
-        for fname in os.listdir(self.path2model):
+        for fname in os.listdir(self.path2models):
             nb_EDUs = 0
-            with open(self.path2model + fname, 'r') as f:
+            with open(self.path2models + fname, 'r') as f:
                 for line in f:
                     reg = r"^\* *(.+)\n"
                     match = re.findall(reg, line)
@@ -69,18 +70,16 @@ class Evaluation:
                 self.__syscallSummarize(l, path2file,
                             input_fname, output_fname)
 
-
     def __syscallSummarize(self, l='10', path2file='./',
                            input_fname='file1.txt',
                            output_fname='file1.abs.name1'):
-        syscall = 'python ' + path2summarize
+        syscall = 'python ' + self.path2summarize
         syscall += ' -l ' + l
         #syscall += ' -d ' + self.path2rslt + output_fname
         syscall += ' ' + path2file + input_fname
         syscall += ' > ' + self.path2summaries + output_fname
         os.system(syscall)
     
-
     def generateRougeScore(self):
         """ Third method to call in order to generate the
             ROUGE score
@@ -92,32 +91,35 @@ class Evaluation:
                 model_fname = system_fname
                 self.__syscallRouge(model_fname, system_fname)
 
-
     def __syscallRouge(self, model_fname='file1.abs.name1',
                        system_fname='file1.abs.name1'):
-        syscall = 'python ' + self.path2summary2rouge
+        if not os.path.exists(self.path2rslt + system_fname):
+            os.mkdir(self.path2rslt + system_fname)
+        syscall = 'python ' + self.path2summaries2rouge
         syscall += ' ' + self.path2rouge
-        syscall += ' ' + self.path2rslt
+        syscall += ' ' + self.path2rslt + system_fname + '/'
         syscall += ' -m'
-        syscall += ' ' + self.path2rst + model_fname
+        syscall += ' ' + self.path2models + model_fname
         syscall += ' -s'
-        syscall += ' ' + self.path2summeries + system_fname
+        syscall += ' ' + self.path2summaries + system_fname
+        syscall += ' > ' + self.path2rslt + system_fname + '/score.txt'
+        #print syscall
         os.system(syscall)
-
 
     
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('path2summarize', type=str,
-                        help="path to the file summarize.py",
-                        default='./../SummarizeApp/discourse/src/summarize.py')
+    parser.add_argument('-p', '--path2summarize', type=str,
+                        help="path to the file summarize.py")
     args = parser.parse_args()
 
     evaluation = Evaluation(path2summarize=args.path2summarize)
     evaluation.loadModels()
-    evaluation.generateSummaries()
+    if args.path2summarize: #^None
+        evaluation.generateSummaries()
     evaluation.generateRougeScore()
+ 
     
 
 

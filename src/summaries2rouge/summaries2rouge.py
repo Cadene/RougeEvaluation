@@ -57,7 +57,7 @@ class Rouge(object):
         score ROUGE-1.5.5.pl
     """
     
-    def __init__(self, path2rouge='../ROUGE-1.5.5/ROUGE-1.5.5.pl',
+    def __init__(self, path2rouge='../ROUGE-1.5.5/',
                  path='./', models=[], systems=[]):
         self.path2rouge = path2rouge
         self.path = path 
@@ -136,11 +136,11 @@ class Rouge(object):
     
     def evaluation(self):
         """ system call to ROUGE-1.5.5 """
-        syscall = 'perl ' + self.path2rouge
+        syscall = 'perl ' + self.path2rouge + 'ROUGE-1.5.5.pl'
         #syscall += ' -e data -c 95 -2 -1 -U -r 1000 -n 4 -w 1.2'
         syscall += ' -e ' + self.path2rouge + 'data'
         syscall += ' -a ' + self.path + 'settings.xml'
-        print syscall
+        #print syscall
         os.system(syscall)
 
 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument('path2rouge', type=str,
-                        help="path to the file ROUGE-1.5.5.pl")
+                        help="path to the directory ROUGE-1.5.5")
     parser.add_argument('path', type=str,
                         help="path to the directory used for the generation of the rouge files")
     parser.add_argument('-s', '--systems', type=str, nargs='+', required=True,

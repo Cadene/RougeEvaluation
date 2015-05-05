@@ -7,7 +7,7 @@ EvaluationApp
 #######################################################################
 EvaluationApp
 
-> main.py
+> evaluation.py
 > src
   > summaries2rouge
   > ROUGE-1.5.5
