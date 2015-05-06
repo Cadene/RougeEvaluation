@@ -139,6 +139,8 @@ class Rouge(object):
         syscall = 'perl ' + self.path2rouge + 'ROUGE-1.5.5.pl'
         #syscall += ' -e data -c 95 -2 -1 -U -r 1000 -n 4 -w 1.2'
         syscall += ' -e ' + self.path2rouge + 'data'
+        syscall += ' -x' #Do not calculate ROUGE-L
+        syscall += ' -n 2' #Compute ROUGE-N up to max-ngram length will be computed
         syscall += ' -a ' + self.path + 'settings.xml'
         #print syscall
         os.system(syscall)

@@ -10,6 +10,10 @@
 # See the License for the specific language governing permissions and limitations under the License. 
 #----------------------------------------------------------------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------------------------------------------
+# Modified by Remi Cadene
+#----------------------------------------------------------------------------------------------------------------------------
+
 if($#ARGV < 1){
 	print "\nUsage: perl rouge2csv.pl <results file>  <csv filename prefix>\n";
 } else {
@@ -121,10 +125,8 @@ if(length $key > 0){
 
 		
 		my @vals = split('.*_.*ROUGE', $j);
-		$filename = $prefix."_ROUGE"."$vals[1]".".csv";
+		$filename = $prefix."_score"."$vals[1]".".csv";
 		$filename =~ tr/\*/X/;
-
-		
 		
 		if (-e $filename) {
 			open(FILE, ">>$filename") or die "can't find the file: $file. \n";
@@ -138,7 +140,7 @@ if(length $key > 0){
 		close(FILE);
 	}
 
-		print "Done...Check current working directory for output.\nIf you reused an old prefix, the results have been appended to that file.";	
+		print "Done...Check current working directory for output.\nIf you reused an old prefix, the results have been appended to that file.\n";	
 
 }
 

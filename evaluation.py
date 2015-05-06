@@ -18,7 +18,7 @@ class Evaluation:
                  path2summaries='./corpus/summaries/',
                  path2models='./corpus/RST-DT/EXT-EDUS-30/',
                  path2summaries2rouge='./src/summaries2rouge/summaries2rouge.py',
-                 path2rouge2csv='./src/rouge2csv/rouge2csv.py',
+                 path2rouge2csv='./src/rouge2csv/rouge2csv.pl',
                  path2rouge='./src/ROUGE-1.5.5/',
                  path2summarize='./../SummarizeApp/discourse/src/summarize.py'):
         self.path2rslt = path2rslt
@@ -84,12 +84,37 @@ class Evaluation:
         """ Third method to call in order to generate the
             ROUGE score
         """
+        # generate score.txt for each summaries using summaries2rouge
         for fname in os.listdir(self.path2txt):
             name = fname.split('.')[0]
             for ext in self.extensions:
                 system_fname = name + ext
                 model_fname = system_fname
                 self.__syscallRouge(model_fname, system_fname)
+        # generate total_score.csv using rouge2csv
+        rouge1_lines = []
+        rouge2_lines = []
+        for fname in os.listdir(self.path2txt):
+            name = fname.split('.')[0]
+            for ext in self.extensions:
+                path2score = self.path2rslt + name + ext + '/score.txt'
+                #print path2score
+                with open(path2score, 'r') as f:
+                    for i, line in enumerate(f):
+                        if i==1 or i==2 or i==3:
+                            rouge1_lines.append(line)
+                        if i==5 or i==6 or i==7:
+                            rouge2_lines.append(line)
+                rouge1_lines.append('\n')
+                rouge2_lines.append('\n')
+        fscores = open(self.path2rslt + 'ROUGE1_scores.txt', 'wb')
+        fscores.write(''.join(rouge1_lines))
+        fscores.close()
+        fscores = open(self.path2rslt + 'ROUGE2_scores.txt', 'wb')
+        fscores.write(''.join(rouge2_lines))
+        fscores.close()
+        self.__syscallRouge2Csv(self.path2rslt + 'ROUGE1_scores.txt', 'ROUGE1')
+        self.__syscallRouge2Csv(self.path2rslt + 'ROUGE2_scores.txt', 'ROUGE2')
 
     def __syscallRouge(self, model_fname='file1.abs.name1',
                        system_fname='file1.abs.name1'):
@@ -105,6 +130,13 @@ class Evaluation:
         syscall += ' > ' + self.path2rslt + system_fname + '/score.txt'
         #print syscall
         os.system(syscall)
+
+    def __syscallRouge2Csv(self, score_fpath='', prefix='prefix'):
+        syscall = 'perl ' + self.path2rouge2csv
+        syscall += ' ' + score_fpath
+        syscall += ' ' + prefix
+        os.system(syscall)
+        os.system('mv ' + prefix + '_score.csv ' + self.path2rslt)
 
     
 if __name__ == '__main__':
